@@ -1,1 +1,6 @@
-/* Add your styles here */
+/* The title takes the free space in the navbar, so the Chat button sits on the right. */
+.app-title {
+  flex-grow: 1;
+  font-size: var(--aura-font-size-xl);
+  margin: 0;
+}

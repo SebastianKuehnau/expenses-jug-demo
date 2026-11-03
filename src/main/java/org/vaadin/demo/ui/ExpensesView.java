@@ -16,6 +16,7 @@ import com.vaadin.flow.router.PageTitle;
 import com.vaadin.flow.router.Route;
 import com.vaadin.flow.spring.data.VaadinSpringDataHelpers;
 import java.time.LocalDate;
+import org.vaadin.demo.compliance.ComplianceService;
 import org.vaadin.demo.expense.Expense;
 import org.vaadin.demo.expense.ExpenseFilter;
 import org.vaadin.demo.expense.ExpenseService;
@@ -51,9 +52,9 @@ public class ExpensesView extends VerticalLayout {
     private final ExpenseForm form;
     private ExpenseFilter filter = ExpenseFilter.NONE;
 
-    public ExpensesView(ExpenseService service, UiAssistant assistant) {
+    public ExpensesView(ExpenseService service, ComplianceService compliance, UiAssistant assistant) {
         this.service = service;
-        this.form = new ExpenseForm(service, this::closeForm);
+        this.form = new ExpenseForm(service, compliance, this::closeForm);
         form.setVisible(false);
         setSizeFull();
         var filterBar = new ExpenseFilterBar(this::applyFilter);
@@ -116,7 +117,7 @@ public class ExpensesView extends VerticalLayout {
             return new Span();
         }
         var icon = VaadinIcon.WARNING.create();
-        icon.setColor("var(--aura-orange)");
+        icon.setColor("var(--aura-orange-text)");
         icon.setTooltipText(expense.getComplianceNote());
         return icon;
     }

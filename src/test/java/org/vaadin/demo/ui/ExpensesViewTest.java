@@ -4,6 +4,8 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.when;
 
 import com.vaadin.browserless.BrowserlessApplicationContext;
 import com.vaadin.browserless.SpringBrowserlessApplicationContext;
@@ -15,6 +17,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.context.ApplicationContext;
 import org.springframework.test.annotation.DirtiesContext;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
+import org.vaadin.demo.compliance.ComplianceResult;
+import org.vaadin.demo.compliance.ComplianceService;
 import org.vaadin.demo.expense.ExpenseCategory;
 import org.vaadin.demo.expense.ExpenseFilter;
 import org.vaadin.demo.expense.ExpenseService;
@@ -28,12 +33,15 @@ class ExpensesViewTest {
     ApplicationContext spring;
     @Autowired
     ExpenseService expenses;
+    @MockitoBean
+    ComplianceService compliance; // these tests are about CRUD, so the AI always says "fine"
 
     BrowserlessApplicationContext app;
     ExpensesPage employee;
 
     @BeforeEach
     void employeeOpensTheExpensesScreen() {
+        when(compliance.check(any())).thenReturn(new ComplianceResult(true, null));
         app = SpringBrowserlessApplicationContext.create(spring, ExpensesView.class);
         employee = new ExpensesPage(app.newUser().newWindow());
         employee.open();

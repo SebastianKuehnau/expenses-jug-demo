@@ -71,8 +71,48 @@ class ExpensesPage {
         window.findBigDecimalField().withLabel("Betrag").setValue(new BigDecimal(amount));
     }
 
+    /** Saving first asks the AI (in the background), so wait until "Prüfe…" is over. */
     void clickSave() {
         window.findButton().withText("Speichern").click();
+        for (int i = 0; i < 50 && window.findButton().withText("Prüfe…").exists(); i++) {
+            window.roundTrip();
+            sleep();
+        }
+        window.roundTrip();
+    }
+
+    private void sleep() {
+        try {
+            Thread.sleep(50);
+        } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
+        }
+    }
+
+    // --- compliance warning ---
+
+    boolean warningIconIsShown() {
+        return window.find(ComplianceWarning.class).exists();
+    }
+
+    void clickWarningIcon() {
+        // The popover is attached to the icon inside the ComplianceWarning composite.
+        var icon = window.find(ComplianceWarning.class).single().getChildren().findFirst().orElseThrow();
+        window.popoverFor(icon).clickTarget();
+    }
+
+    boolean popoverShows(String text) {
+        return window.findPopover().exists()
+                && window.findParagraph().withCondition(p -> p.getText().contains(text)).exists();
+    }
+
+    void clickSaveAnyway() {
+        window.findButton().withText("Trotzdem speichern").click();
+        window.roundTrip();
+    }
+
+    void changeDescriptionTo(String description) {
+        window.findTextArea().withLabel("Beschreibung").setValue(description);
     }
 
     void clickDelete() {

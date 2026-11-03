@@ -3,7 +3,7 @@ package org.vaadin.demo.ui;
 import com.vaadin.flow.component.card.Card;
 import com.vaadin.flow.component.html.H2;
 import com.vaadin.flow.component.html.Span;
-import com.vaadin.flow.component.orderedlayout.FlexLayout;
+import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.router.PageTitle;
 import com.vaadin.flow.router.Route;
@@ -27,10 +27,9 @@ public class DashboardView extends VerticalLayout {
         add(new H2("Übersicht"), createCards(all));
     }
 
-    private FlexLayout createCards(List<Expense> all) {
-        var cards = new FlexLayout();
-        cards.setFlexWrap(FlexLayout.FlexWrap.WRAP);
-        cards.getStyle().set("gap", "var(--vaadin-gap-m, 1rem)"); // FlexLayout has no spacing API
+    private HorizontalLayout createCards(List<Expense> all) {
+        var cards = new HorizontalLayout();
+        cards.setWrap(true);
         cards.add(card("Summe laufender Monat", Formats.money(sumThisMonth(all))));
         cards.add(card("Anzahl Belege", String.valueOf(all.size())));
         sumsByCategory(all).forEach((category, sum) ->

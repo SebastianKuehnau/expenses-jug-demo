@@ -20,6 +20,7 @@ import org.vaadin.demo.compliance.ComplianceService;
 import org.vaadin.demo.expense.Expense;
 import org.vaadin.demo.expense.ExpenseFilter;
 import org.vaadin.demo.expense.ExpenseService;
+import org.vaadin.demo.receipt.ReceiptExtractionService;
 
 @Route(value = "expenses", layout = MainLayout.class)
 @PageTitle("Ausgaben")
@@ -52,9 +53,10 @@ public class ExpensesView extends VerticalLayout {
     private final ExpenseForm form;
     private ExpenseFilter filter = ExpenseFilter.NONE;
 
-    public ExpensesView(ExpenseService service, ComplianceService compliance, UiAssistant assistant) {
+    public ExpensesView(ExpenseService service, ComplianceService compliance,
+            ReceiptExtractionService receipts, UiAssistant assistant) {
         this.service = service;
-        this.form = new ExpenseForm(service, compliance, this::closeForm);
+        this.form = new ExpenseForm(service, compliance, receipts, this::closeForm);
         form.setVisible(false);
         setSizeFull();
         var filterBar = new ExpenseFilterBar(this::applyFilter);

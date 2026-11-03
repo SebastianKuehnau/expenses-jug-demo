@@ -89,6 +89,35 @@ class ExpensesPage {
         }
     }
 
+    // --- receipt scan ---
+
+    /** Drops a receipt on "Beleg scannen". The AI reads it in the background: wait for the result. */
+    void scanReceipt(byte[] image) {
+        window.findUpload().upload("beleg.png", "image/png", image);
+        for (int i = 0; i < 50 && merchant().isEmpty(); i++) {
+            window.roundTrip();
+            sleep();
+        }
+        window.roundTrip();
+    }
+
+    String merchant() {
+        return window.findTextField().withLabel("Händler").component().getValue();
+    }
+
+    String amountText() {
+        return String.valueOf(window.findBigDecimalField().withLabel("Betrag").component().getValue());
+    }
+
+    String category() {
+        return window.findComboBox(ExpenseCategory.class).withLabel("Kategorie").component()
+                .getValue().getLabel();
+    }
+
+    String description() {
+        return window.findTextArea().withLabel("Beschreibung").component().getValue();
+    }
+
     // --- compliance warning ---
 
     boolean warningIconIsShown() {

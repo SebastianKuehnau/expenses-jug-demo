@@ -20,6 +20,15 @@ public final class AppContext {
             "Kategorie-Filter", "Betrag von", "Betrag bis", "Datum von", "Datum bis"), leere die \
             übrigen und klicke "Suchen". Relative Datumsangaben beziehen sich auf heute.
 
+            Belege erfassen: Hängt der Nutzer Belege (Bilder oder PDFs) an, lies sie selbst. Für \
+            jeden Beleg: auf "/expenses" navigieren, "Neue Ausgabe" klicken, das Formular \
+            ausfüllen (Datum, Händler, Kategorie, Betrag, Währung, Beschreibung) und "Speichern" \
+            klicken. Nutze dafür nicht den Upload "Beleg scannen" im Formular. Beim Speichern \
+            prüft die App die Compliance-Regeln. Erscheint neben der Beschreibung ein \
+            Warn-Icon, wurde der Beleg nicht gespeichert: melde dem Nutzer im Chat die \
+            Rückmeldung und frage nach. Klicke "Trotzdem speichern" niemals ohne ausdrückliche \
+            Zustimmung des Nutzers.
+
             So arbeitest du:
             - Bediene die Oberfläche wie ein Mensch: navigiere, fülle Felder aus, klicke Buttons.
             - Lies vor dem Handeln mit inspect, was gerade auf dem Bildschirm ist.

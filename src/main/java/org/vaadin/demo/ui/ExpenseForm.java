@@ -21,6 +21,8 @@ import org.vaadin.demo.compliance.ComplianceService;
 import org.vaadin.demo.expense.Expense;
 import org.vaadin.demo.expense.ExpenseCategory;
 import org.vaadin.demo.expense.ExpenseService;
+import org.vaadin.demo.receipt.ReceiptData;
+import org.vaadin.demo.receipt.ReceiptExtractionService;
 
 /** Edit form for one expense. Tells its parent via {@code onDone} when the user is finished. */
 public class ExpenseForm extends VerticalLayout {
@@ -47,7 +49,8 @@ public class ExpenseForm extends VerticalLayout {
     private final Runnable onDone;
     private Expense expense;
 
-    public ExpenseForm(ExpenseService service, ComplianceService compliance, Runnable onDone) {
+    public ExpenseForm(ExpenseService service, ComplianceService compliance,
+            ReceiptExtractionService receipts, Runnable onDone) {
         this.service = service;
         this.compliance = compliance;
         this.onDone = onDone;
@@ -58,7 +61,7 @@ public class ExpenseForm extends VerticalLayout {
         // The AI's feedback was about the old text: once the text changes, it no longer applies.
         description.addValueChangeListener(e -> warning.hide());
         binder.bindInstanceFields(this);
-        add(createFields(), createButtons());
+        add(new ReceiptUpload(receipts, this::fillFrom), createFields(), createButtons());
     }
 
     /** Shows the given expense; a new, unsaved one means "create". */
@@ -67,6 +70,19 @@ public class ExpenseForm extends VerticalLayout {
         binder.readBean(expense);
         warning.hide();
         delete.setVisible(expense.getId() != null);
+    }
+
+    /**
+     * Puts what the AI read into the fields. It is only a suggestion: nothing is saved
+     * until the user clicks "Speichern" (which also runs the compliance check).
+     */
+    private void fillFrom(ReceiptData receipt) {
+        if (receipt.date() != null) date.setValue(receipt.date());
+        if (receipt.merchant() != null) merchant.setValue(receipt.merchant());
+        if (receipt.category() != null) category.setValue(receipt.category());
+        if (receipt.amount() != null) amount.setValue(receipt.amount());
+        if (receipt.currency() != null) currency.setValue(receipt.currency());
+        if (receipt.description() != null) description.setValue(receipt.description());
     }
 
     private FormLayout createFields() {

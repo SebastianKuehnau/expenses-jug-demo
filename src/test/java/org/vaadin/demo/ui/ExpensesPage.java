@@ -97,8 +97,21 @@ class ExpensesPage {
         window.findComboBox(ExpenseCategory.class).withLabel("Kategorie-Filter").selectItem(category.getLabel());
     }
 
+    void filterByText(String text) {
+        window.findTextField().withLabel("Suche").setValue(text);
+    }
+
+    void filterByDates(LocalDate from, LocalDate to) {
+        window.findDatePicker().withLabel("Datum von").setValue(from);
+        window.findDatePicker().withLabel("Datum bis").setValue(to);
+    }
+
     void filterByMinAmount(String amount) {
         window.findBigDecimalField().withLabel("Betrag von").setValue(new BigDecimal(amount));
+    }
+
+    void clickReset() {
+        window.findButton().withText("Zurücksetzen").click();
     }
 
     void clickSearch() {

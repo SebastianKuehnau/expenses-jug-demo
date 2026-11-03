@@ -111,4 +111,36 @@ class ExpensesViewTest {
         assertTrue(employee.showsRowWith("Hotel Sacher Wien"));
         assertFalse(employee.showsRowWith("ÖBB"));
     }
+
+    /** The AI fills exactly these fields and clicks "Suchen"; here the test plays the AI. */
+    @Test
+    void filter_by_merchant_text() {
+        employee.filterByText("ÖBB");
+        employee.clickSearch();
+
+        assertEquals(5, employee.rowCount());
+        assertTrue(employee.showsRowWith("ÖBB"));
+        assertFalse(employee.showsRowWith("Hotel"));
+    }
+
+    @Test
+    void filter_by_category_amount_and_date_range() {
+        employee.filterByCategory(ExpenseCategory.MEALS);
+        employee.filterByMinAmount("100");
+        employee.filterByDates(LocalDate.now().minusMonths(1), LocalDate.now());
+        employee.clickSearch();
+
+        assertEquals(1, employee.rowCount());
+        assertTrue(employee.showsRowWith("Steirereck"));
+    }
+
+    @Test
+    void reset_shows_all_expenses_again() {
+        employee.filterByText("ÖBB");
+        employee.clickSearch();
+
+        employee.clickReset();
+
+        assertTrue(employee.rowCount() >= 40);
+    }
 }

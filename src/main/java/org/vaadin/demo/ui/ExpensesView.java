@@ -1,5 +1,8 @@
 package org.vaadin.demo.ui;
 
+import com.vaadin.draiv.ai.ui.AgentScope;
+import com.vaadin.draiv.ai.ui.AiGoalBar;
+import com.vaadin.draiv.ai.ui.UiAssistant;
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.grid.ColumnTextAlign;
@@ -23,17 +26,46 @@ public class ExpensesView extends VerticalLayout {
 
     private static final int DESCRIPTION_LENGTH = 50;
 
+    /**
+     * How the AI should operate THIS screen. {@code %s} is replaced by what the user typed.
+     * The AI does not write a query. It fills the visible filter fields and clicks "Suchen",
+     * so the user sees what was filtered, can correct it, and normal validation still applies.
+     */
+    private static final String AI_GOAL = """
+            Der Nutzer beschreibt in eigenen Worten, welche Ausgaben er sehen will. Setze in der \
+            Filterleiste nur die Felder, die die Anfrage nahelegt, leere alle anderen Felder und \
+            klicke dann auf "Suchen".
+
+            Zuordnung:
+            - Händler oder Stichwort: Feld "Suche"
+            - Art der Ausgabe (Reise, Bewirtung, Unterkunft, Büro, Software, Weiterbildung): "Kategorie-Filter"
+            - Beträge: "Betrag von" und "Betrag bis" (nur die Zahl, ohne Währung)
+            - Zeitraum: "Datum von" und "Datum bis". Relative Angaben wie "letzter Monat" oder \
+            "dieses Quartal" beziehen sich auf das heutige Datum.
+
+            Erfinde keine Bedingungen, die der Nutzer nicht genannt hat. Anfrage: "%s"
+            """;
+
     private final ExpenseService service;
     private final Grid<Expense> grid = new Grid<>(Expense.class, false);
     private final ExpenseForm form;
     private ExpenseFilter filter = ExpenseFilter.NONE;
 
-    public ExpensesView(ExpenseService service) {
+    public ExpensesView(ExpenseService service, UiAssistant assistant) {
         this.service = service;
         this.form = new ExpenseForm(service, this::closeForm);
         form.setVisible(false);
         setSizeFull();
-        add(new ExpenseFilterBar(this::applyFilter), createNewButton(), createSplitLayout());
+        var filterBar = new ExpenseFilterBar(this::applyFilter);
+        add(createAiBar(assistant, filterBar), filterBar, createNewButton(), createSplitLayout());
+    }
+
+    private AiGoalBar createAiBar(UiAssistant assistant, ExpenseFilterBar filterBar) {
+        var aiBar = new AiGoalBar(assistant, "Filtern", AI_GOAL);
+        aiBar.setPlaceholder("z. B. Bewirtung über 100 € im Oktober");
+        // The AI may only see and touch the filter bar, never the grid or the form.
+        aiBar.setScope(AgentScope.within(filterBar));
+        return aiBar;
     }
 
     private Button createNewButton() {

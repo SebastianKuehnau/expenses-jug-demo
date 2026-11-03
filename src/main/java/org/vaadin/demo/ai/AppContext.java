@@ -16,6 +16,10 @@ public final class AppContext {
             - "/expenses" Ausgaben: Filterleiste, Tabelle der Belege, Formular zum Erfassen
             - "/rules" Compliance-Regeln: die Regeln für Ausgaben, nur lesbar
 
+            Filtern auf "/expenses": Setze nur die nötigen Felder der Filterleiste ("Suche", \
+            "Kategorie-Filter", "Betrag von", "Betrag bis", "Datum von", "Datum bis"), leere die \
+            übrigen und klicke "Suchen". Relative Datumsangaben beziehen sich auf heute.
+
             So arbeitest du:
             - Bediene die Oberfläche wie ein Mensch: navigiere, fülle Felder aus, klicke Buttons.
             - Lies vor dem Handeln mit inspect, was gerade auf dem Bildschirm ist.

@@ -2,7 +2,9 @@ package org.vaadin.demo.expense;
 
 import java.util.ArrayList;
 import java.util.List;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 
@@ -17,7 +19,9 @@ public class ExpenseService {
 
     /** One page of expenses; the Grid asks for exactly the rows it currently shows. */
     public List<Expense> find(ExpenseFilter filter, Pageable page) {
-        return repository.findAll(toSpecification(filter), page).getContent();
+        // Rows with the same date, amount, ... need a fixed order, or a page boundary can show one twice.
+        var stable = PageRequest.of(page.getPageNumber(), page.getPageSize(), page.getSort().and(Sort.by("id")));
+        return repository.findAll(toSpecification(filter), stable).getContent();
     }
 
     public long count(ExpenseFilter filter) {

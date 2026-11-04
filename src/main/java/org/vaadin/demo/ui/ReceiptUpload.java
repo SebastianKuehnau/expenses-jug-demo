@@ -1,69 +1,46 @@
 package org.vaadin.demo.ui;
 
 import com.vaadin.flow.component.Composite;
-import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.button.Button;
-import com.vaadin.flow.component.notification.Notification;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.component.progressbar.ProgressBar;
 import com.vaadin.flow.component.upload.Upload;
 import com.vaadin.flow.server.streams.UploadHandler;
-import java.util.concurrent.CompletableFuture;
 import java.util.function.Consumer;
-import org.vaadin.demo.receipt.ReceiptData;
-import org.vaadin.demo.receipt.ReceiptExtractionService;
 
-/** "Scan receipt": drop a receipt, the AI reads it, the result goes to {@code onExtracted}. */
+/** "Scan receipt": drop a receipt; the file goes to {@code onUploaded}, which lets the AI read it. */
 public class ReceiptUpload extends Composite<VerticalLayout> {
 
-    private final ReceiptExtractionService extraction;
-    private final Consumer<ReceiptData> onExtracted;
+    /** The file as the browser sent it. */
+    public record UploadedFile(String name, String mimeType, byte[] data) {
+    }
+
     private final Upload upload;
     private final ProgressBar progress = new ProgressBar();
 
-    public ReceiptUpload(ReceiptExtractionService extraction, Consumer<ReceiptData> onExtracted) {
-        this.extraction = extraction;
-        this.onExtracted = onExtracted;
+    public ReceiptUpload(boolean aiAvailable, Consumer<UploadedFile> onUploaded) {
         // inMemory: the handler gets the whole file as byte[] (on the UI thread).
         this.upload = new Upload(UploadHandler.inMemory((metadata, data) ->
-                scan(data, metadata.contentType())));
+                onUploaded.accept(new UploadedFile(metadata.fileName(), metadata.contentType(), data))));
         upload.setAcceptedFileTypes("image/*", "application/pdf");
         upload.setMaxFiles(1);
         upload.setUploadButton(new Button("Scan receipt"));
         progress.setIndeterminate(true);
         progress.setVisible(false);
-        enableIfAiIsConfigured();
+        if (!aiAvailable) {
+            upload.setEnabled(false);
+            upload.getElement().setAttribute("title", "No OPENAI_API_KEY configured");
+        }
         VerticalLayout layout = getContent();
         layout.setPadding(false);
         layout.add(upload, progress);
     }
 
-    private void enableIfAiIsConfigured() {
-        if (!extraction.isAvailable()) {
-            upload.setEnabled(false);
-            upload.getElement().setAttribute("title", "No OPENAI_API_KEY configured");
+    /** While the AI reads the receipt: show the progress bar and block further uploads. */
+    public void setScanning(boolean scanning) {
+        if (!scanning) {
+            upload.clearFileList();
         }
-    }
-
-    private void scan(byte[] data, String mimeType) {
-        setScanning(true);
-        UI ui = UI.getCurrent();
-        // The AI call takes seconds: run it in the background, then come back with UI.access.
-        CompletableFuture.supplyAsync(() -> extraction.extract(data, mimeType))
-                .whenComplete((receipt, error) -> ui.access(() -> afterScan(receipt, error)));
-    }
-
-    private void afterScan(ReceiptData receipt, Throwable error) {
-        setScanning(false);
-        upload.clearFileList();
-        if (error != null) {
-            Notification.show("The receipt could not be read.");
-        } else {
-            onExtracted.accept(receipt);
-        }
-    }
-
-    private void setScanning(boolean scanning) {
         upload.setEnabled(!scanning);
         progress.setVisible(scanning);
     }

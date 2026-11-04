@@ -1,7 +1,10 @@
 package org.vaadin.demo.ui;
 
 import com.vaadin.browserless.BrowserlessUIContext;
+import com.vaadin.flow.component.ComponentUtil;
+import com.vaadin.flow.component.FocusNotifier;
 import com.vaadin.flow.component.grid.GridLocator;
+import com.vaadin.flow.component.html.Div;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.List;
@@ -114,6 +117,28 @@ class ExpensesPage {
             sleep();
         }
         window.roundTrip();
+    }
+
+    boolean chatReceiptFieldIsShown() {
+        return window.findComboBox(String.class).withLabel("Receipt from chat").exists();
+    }
+
+    void pickChatReceipt(String fileName) {
+        window.findComboBox(String.class).withLabel("Receipt from chat").selectItem(fileName);
+    }
+
+    /** Clicks into a field, like the user does to ask "where did this value come from?". */
+    void focusMerchant() {
+        var field = window.findTextField().withLabel("Merchant").component();
+        ComponentUtil.fireEvent(field, new FocusNotifier.FocusEvent<>(field, true));
+    }
+
+    int highlightsOnReceipt() {
+        return window.find(Div.class).withClassName("receipt-highlight").all().size();
+    }
+
+    boolean receiptPreviewIsShown() {
+        return window.find(ReceiptPreview.class).exists();
     }
 
     String merchant() {

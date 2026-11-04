@@ -1,14 +1,17 @@
 package org.vaadin.demo.ui.chat;
 
 import com.vaadin.draiv.ai.presenter.TextPresenterService.Attachment;
+import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.html.Span;
 import com.vaadin.flow.component.icon.Icon;
 import com.vaadin.flow.component.icon.VaadinIcon;
 import com.vaadin.flow.component.upload.Upload;
 import com.vaadin.flow.server.streams.UploadHandler;
+import com.vaadin.flow.server.streams.UploadMetadata;
 import java.util.ArrayList;
 import java.util.Base64;
 import java.util.List;
+import org.vaadin.demo.ui.ChatReceipts;
 
 /** Drag-and-drop upload for the chat. Collects the files until the next message is sent. */
 class ChatAttachments {
@@ -18,9 +21,7 @@ class ChatAttachments {
 
     ChatAttachments() {
         // inMemory: the handler gets the whole file as byte[]; fine for receipts (max 20 MB).
-        upload = new Upload(UploadHandler.inMemory((metadata, data) -> pending.add(new Attachment(
-                metadata.fileName(), metadata.contentType(),
-                Base64.getEncoder().encodeToString(data)))));
+        upload = new Upload(UploadHandler.inMemory(this::received));
         upload.setAcceptedFileTypes("image/*", "application/pdf");
         upload.setMaxFiles(5);
         upload.setMaxFileSize(20 * 1024 * 1024);
@@ -29,6 +30,13 @@ class ChatAttachments {
         upload.setDropLabelIcon(new Icon(VaadinIcon.CLOUD_UPLOAD_O));
         // Removing a file chip in the upload also removes the attachment.
         upload.addFileRemovedListener(e -> pending.removeIf(a -> a.filename().equals(e.getFileName())));
+    }
+
+    /** Goes to the AI with the next message, and stays available to the expense form. */
+    private void received(UploadMetadata metadata, byte[] data) {
+        pending.add(new Attachment(metadata.fileName(), metadata.contentType(),
+                Base64.getEncoder().encodeToString(data)));
+        ChatReceipts.of(UI.getCurrent()).add(metadata.fileName(), metadata.contentType(), data);
     }
 
     Upload component() {

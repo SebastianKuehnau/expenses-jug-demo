@@ -9,7 +9,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.context.ApplicationContext;
 
-@SpringBootTest(properties = {"spring.ai.openai.api-key=not-configured"})
+@SpringBootTest(properties = {
+        "openai.api-key=not-configured",
+        "spring.ai.openai.api-key=not-configured"})
 class ChatWithoutApiKeyTest {
 
     @Autowired

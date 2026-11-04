@@ -2,19 +2,23 @@ package org.vaadin.demo.expense;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 @Service
 public class ExpenseService {
 
     private final ExpenseRepository repository;
+    private final ReceiptFileRepository receipts;
 
-    public ExpenseService(ExpenseRepository repository) {
+    public ExpenseService(ExpenseRepository repository, ReceiptFileRepository receipts) {
         this.repository = repository;
+        this.receipts = receipts;
     }
 
     /** One page of expenses; the Grid asks for exactly the rows it currently shows. */
@@ -36,7 +40,24 @@ public class ExpenseService {
         return repository.save(expense);
     }
 
+    /** Saves the expense together with its uploaded receipt; a {@code null} receipt keeps the old one. */
+    @Transactional
+    public Expense save(Expense expense, ReceiptFile receipt) {
+        Expense saved = repository.save(expense);
+        if (receipt != null) {
+            receipts.deleteByExpenseId(saved.getId());
+            receipts.save(new ReceiptFile(saved.getId(), receipt.getContentType(), receipt.getData()));
+        }
+        return saved;
+    }
+
+    public Optional<ReceiptFile> findReceipt(Long expenseId) {
+        return receipts.findByExpenseId(expenseId);
+    }
+
+    @Transactional
     public void delete(Expense expense) {
+        receipts.deleteByExpenseId(expense.getId());
         repository.delete(expense);
     }
 

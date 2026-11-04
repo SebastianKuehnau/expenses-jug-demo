@@ -1,14 +1,17 @@
 package org.vaadin.demo.ui;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import com.vaadin.browserless.BrowserlessApplicationContext;
+import com.vaadin.draiv.ai.presenter.TextPresenterProperties;
+import com.vaadin.flow.component.ai.provider.LLMProvider;
 import com.vaadin.browserless.SpringBrowserlessApplicationContext;
-import java.math.BigDecimal;
+import java.util.Map;
 import java.time.LocalDate;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
@@ -23,8 +26,6 @@ import org.vaadin.demo.compliance.ComplianceService;
 import org.vaadin.demo.expense.ExpenseCategory;
 import org.vaadin.demo.expense.ExpenseFilter;
 import org.vaadin.demo.expense.ExpenseService;
-import org.vaadin.demo.receipt.ReceiptData;
-import org.vaadin.demo.receipt.ReceiptExtractionService;
 
 /** "Scan receipt" in the expense form. The AI that reads the receipt is replaced by a fake. */
 @SpringBootTest
@@ -37,8 +38,11 @@ class ReceiptScanTest {
     ApplicationContext spring;
     @Autowired
     ExpenseService expenses;
+    /** The AI that reads the receipt is replaced by a fake that fills the form like the real one. */
+    @MockitoBean(name = "receiptFormProvider")
+    LLMProvider receiptReader;
     @MockitoBean
-    ReceiptExtractionService extraction;
+    TextPresenterProperties aiProperties;
     @MockitoBean
     ComplianceService compliance;
 
@@ -48,10 +52,14 @@ class ReceiptScanTest {
 
     @BeforeEach
     void employeeOpensTheFormForANewExpense() {
-        when(extraction.isAvailable()).thenReturn(true);
-        when(extraction.extract(any(), any())).thenReturn(new ReceiptData(
-                LocalDate.now().minusDays(3), "ÖBB", new BigDecimal("78.60"), "EUR",
-                ExpenseCategory.TRAVEL, "Railjet Vienna – Graz"));
+        when(aiProperties.isEnabled()).thenReturn(true);
+        when(receiptReader.stream(any())).thenAnswer(call -> FakeReceiptReader.fill(call.getArgument(0), Map.of(
+                "Date", LocalDate.now().minusDays(3).toString(),
+                "Merchant", "ÖBB",
+                "Category", ExpenseCategory.TRAVEL.getLabel(),
+                "Amount", "78.60",
+                "Currency", "EUR",
+                "Description", "Railjet Vienna – Graz")));
         when(compliance.check(any())).thenReturn(new ComplianceResult(true, null));
         app = SpringBrowserlessApplicationContext.create(spring, ExpensesView.class);
         employee = new ExpensesPage(app.newUser().newWindow());
@@ -77,6 +85,25 @@ class ReceiptScanTest {
     }
 
     @Test
+    void uploadedReceiptIsShownNextToTheForm() {
+        assertFalse(employee.receiptPreviewIsShown());
+
+        employee.scanReceipt(RECEIPT_IMAGE);
+
+        assertTrue(employee.receiptPreviewIsShown());
+    }
+
+    @Test
+    void receiptShowsWhereTheAiReadTheMerchantFrom() {
+        employee.scanReceipt(RECEIPT_IMAGE);
+        assertEquals(0, employee.highlightsOnReceipt());
+
+        employee.focusMerchant();
+
+        assertEquals(1, employee.highlightsOnReceipt());
+    }
+
+    @Test
     void employeeReviewsTheScannedReceiptAndSavesItWithTheComplianceCheck() {
         employee.scanReceipt(RECEIPT_IMAGE);
 
@@ -85,5 +112,26 @@ class ReceiptScanTest {
         assertEquals(expensesBefore + 1, expenses.count(ExpenseFilter.NONE));
         verify(compliance).check(any());
         assertTrue(employee.showsRowWith("Railjet Vienna"));
+    }
+
+    @Test
+    void savedReceiptIsShownAgainWhenTheExpenseIsReopened() {
+        employee.scanReceipt(RECEIPT_IMAGE);
+        employee.changeDescriptionTo("Train ticket with attached receipt"); // the seed data has similar rows
+        employee.clickSave();
+        assertTrue(employee.showsRowWithEventually("Train ticket with attached receipt"));
+
+        employee.selectRowWith("Train ticket with attached receipt");
+
+        assertTrue(employee.receiptPreviewIsShown());
+    }
+
+    @Test
+    void expenseWithoutUploadedReceiptHasNoPreview() {
+        employee.clickCancel();
+
+        employee.selectRowWith("Notebooks");
+
+        assertFalse(employee.receiptPreviewIsShown());
     }
 }

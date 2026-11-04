@@ -1,12 +1,24 @@
 package org.vaadin.demo.ui;
 
 import com.vaadin.flow.component.UI;
+import com.vaadin.flow.component.Component;
+import com.vaadin.flow.component.Focusable;
+import com.vaadin.flow.component.HasValue;
+import com.vaadin.flow.component.ai.common.AIAttachment;
+import com.vaadin.flow.component.ai.common.PageRegion;
+import com.vaadin.flow.component.ai.common.Rect;
+import com.vaadin.flow.component.ai.common.SourceExtract;
+import com.vaadin.flow.component.ai.form.FieldValueChangeEvent;
+import com.vaadin.flow.component.ai.form.FormAIController;
+import com.vaadin.flow.component.ai.orchestrator.AIOrchestrator;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.button.ButtonVariant;
 import com.vaadin.flow.component.combobox.ComboBox;
 import com.vaadin.flow.component.confirmdialog.ConfirmDialog;
 import com.vaadin.flow.component.datepicker.DatePicker;
 import com.vaadin.flow.component.formlayout.FormLayout;
+import com.vaadin.flow.component.html.Div;
+import com.vaadin.flow.component.html.Paragraph;
 import com.vaadin.flow.component.notification.Notification;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
@@ -15,17 +27,18 @@ import com.vaadin.flow.component.textfield.TextArea;
 import com.vaadin.flow.component.textfield.TextField;
 import com.vaadin.flow.data.binder.BeanValidationBinder;
 import com.vaadin.flow.data.binder.ValidationException;
+import java.util.List;
 import java.util.concurrent.CompletableFuture;
 import org.vaadin.demo.compliance.ComplianceResult;
 import org.vaadin.demo.compliance.ComplianceService;
 import org.vaadin.demo.expense.Expense;
 import org.vaadin.demo.expense.ExpenseCategory;
 import org.vaadin.demo.expense.ExpenseService;
-import org.vaadin.demo.receipt.ReceiptData;
-import org.vaadin.demo.receipt.ReceiptExtractionService;
+import org.vaadin.demo.expense.ReceiptFile;
+import org.vaadin.demo.receipt.ReceiptFormAi;
 
 /** Edit form for one expense. Tells its parent via {@code onDone} when the user is finished. */
-public class ExpenseForm extends VerticalLayout {
+public class ExpenseForm extends HorizontalLayout {
 
     private final DatePicker date = new DatePicker("Date");
     private final TextField merchant = new TextField("Merchant");
@@ -36,6 +49,8 @@ public class ExpenseForm extends VerticalLayout {
     private final FormLayout fields = new FormLayout();
     private final Button save = new Button("Save", e -> checkAndSave());
     private final Button delete = new Button("Delete", e -> confirmDelete());
+    private final ComboBox<String> chatReceipt = new ComboBox<>("Receipt from chat");
+    private final ReceiptPreview preview = new ReceiptPreview();
     private final ComplianceWarning warning = new ComplianceWarning(this::saveAnyway);
 
     /**
@@ -44,13 +59,19 @@ public class ExpenseForm extends VerticalLayout {
      */
     private final BeanValidationBinder<Expense> binder = new BeanValidationBinder<>(Expense.class);
 
+    private final ReceiptUpload receiptUpload;
+    private final FormAIController filler;
+    private final AIOrchestrator orchestrator;
+
     private final ExpenseService service;
     private final ComplianceService compliance;
     private final Runnable onDone;
     private Expense expense;
+    /** The file uploaded while this form is open; saved together with the expense. */
+    private ReceiptFile uploadedReceipt;
 
     public ExpenseForm(ExpenseService service, ComplianceService compliance,
-            ReceiptExtractionService receipts, Runnable onDone) {
+            ReceiptFormAi receiptAi, Runnable onDone) {
         this.service = service;
         this.compliance = compliance;
         this.onDone = onDone;
@@ -61,7 +82,41 @@ public class ExpenseForm extends VerticalLayout {
         // The AI's feedback was about the old text: once the text changes, it no longer applies.
         description.addValueChangeListener(e -> warning.hide());
         binder.bindInstanceFields(this);
-        add(new ReceiptUpload(receipts, this::fillFrom), createFields(), createButtons());
+        receiptUpload = new ReceiptUpload(receiptAi.isAvailable(), this::receiptUploaded);
+        var fieldLayout = createFields();
+        filler = createFiller();
+        orchestrator = receiptAi.createOrchestrator(filler, event -> scanFinished());
+        var formColumn = new VerticalLayout(receiptUpload, chatReceipt, fieldLayout, createButtons());
+        formColumn.setPadding(false);
+        formColumn.setWidth("24rem");
+        // The uploaded receipt appears to the right of the fields, so it can be checked against them.
+        add(formColumn, preview);
+        chatReceipt.addValueChangeListener(e -> attachFromChat(e.getValue()));
+        showSourceOnFocus(date);
+        showSourceOnFocus(merchant);
+        showSourceOnFocus(category);
+        showSourceOnFocus(amount);
+        showSourceOnFocus(currency);
+        showSourceOnFocus(description);
+    }
+
+    /** The AI works in the background: come back to the UI thread before touching components. */
+    private void scanFinished() {
+        getUI().ifPresent(ui -> ui.access(() -> receiptUpload.setScanning(false)));
+    }
+
+    /** Click into a field and the receipt shows where the AI read that value (images only). */
+    private <C extends Component & Focusable<C> & HasValue<?, ?>> void showSourceOnFocus(C field) {
+        field.addFocusListener(e -> preview.highlight(placesOnReceipt(field)));
+    }
+
+    private List<Rect> placesOnReceipt(HasValue<?, ?> field) {
+        return filler.getFieldSource(field).stream()
+                .flatMap(source -> source.extracts().stream())
+                .map(SourceExtract::location)
+                .filter(PageRegion.class::isInstance)
+                .map(location -> ((PageRegion) location).rect())
+                .toList();
     }
 
     /** Shows the given expense; a new, unsaved one means "create". */
@@ -69,20 +124,67 @@ public class ExpenseForm extends VerticalLayout {
         this.expense = expense;
         binder.readBean(expense);
         warning.hide();
+        uploadedReceipt = null;
+        preview.highlight(List.of());
+        offerChatReceipts();
+        showSavedReceipt(expense);
         delete.setVisible(expense.getId() != null);
     }
 
+    private void showSavedReceipt(Expense expense) {
+        preview.clear();
+        if (expense.getId() != null) {
+            service.findReceipt(expense.getId())
+                    .ifPresent(file -> preview.show(file.getData(), file.getContentType()));
+        }
+    }
+
+    /** Receipts attached in the chat can be picked here; the field only shows up if there are any. */
+    private void offerChatReceipts() {
+        chatReceipt.clear();
+        chatReceipt.setItems(ChatReceipts.of(UI.getCurrent()).fileNames());
+        chatReceipt.setVisible(!ChatReceipts.of(UI.getCurrent()).fileNames().isEmpty());
+    }
+
+    private void attachFromChat(String fileName) {
+        if (fileName == null) {
+            return;
+        }
+        ChatReceipts.of(UI.getCurrent()).find(fileName).ifPresent(file -> {
+            uploadedReceipt = file;
+            preview.show(file.getData(), file.getContentType());
+        });
+    }
+
+    /** The AI reads the receipt and fills the fields; the form shows where each value came from. */
+    private void receiptUploaded(ReceiptUpload.UploadedFile file) {
+        uploadedReceipt = new ReceiptFile(null, file.mimeType(), file.data());
+        preview.show(file.data(), file.mimeType());
+        receiptUpload.setScanning(true);
+        orchestrator.prompt("Fill in the form from the attached receipt.",
+                List.of(new AIAttachment(file.name(), file.mimeType(), file.data())));
+    }
+
     /**
-     * Puts what the AI read into the fields. It is only a suggestion: nothing is saved
-     * until the user clicks "Save" (which also runs the compliance check).
+     * Vaadin's AI Form Filler. It marks every field the AI wrote with an "AI" badge. With source
+     * tracking on, the badge's popover also shows what the AI read on the receipt for that value.
      */
-    private void fillFrom(ReceiptData receipt) {
-        if (receipt.date() != null) date.setValue(receipt.date());
-        if (receipt.merchant() != null) merchant.setValue(receipt.merchant());
-        if (receipt.category() != null) category.setValue(receipt.category());
-        if (receipt.amount() != null) amount.setValue(receipt.amount());
-        if (receipt.currency() != null) currency.setValue(receipt.currency());
-        if (receipt.description() != null) description.setValue(receipt.description());
+    private FormAIController createFiller() {
+        var controller = new FormAIController(fields, binder);
+        controller.setSourceTrackingEnabled(true);
+        controller.setFieldMarkerPopoverContentProvider(this::describeSource);
+        return controller;
+    }
+
+    private Component describeSource(FieldValueChangeEvent change) {
+        return change.getFieldSource().<Component>map(source -> {
+            var content = new Div();
+            if (source.confidence() != null) {
+                content.add(new Paragraph("Confidence: " + source.confidence().name().toLowerCase()));
+            }
+            source.extracts().forEach(extract -> content.add(new Paragraph("On the receipt: “" + extract.text() + "”")));
+            return content;
+        }).orElse(null);
     }
 
     private FormLayout createFields() {
@@ -137,7 +239,7 @@ public class ExpenseForm extends VerticalLayout {
         }
         expense.setComplianceOverridden(overridden);
         expense.setComplianceNote(note);
-        service.save(expense);
+        service.save(expense, uploadedReceipt);
         Notification.show("Expense saved");
         onDone.run();
     }

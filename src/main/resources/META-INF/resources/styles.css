@@ -4,3 +4,26 @@
   font-size: var(--aura-font-size-xl);
   margin: 0;
 }
+
+/* The receipt picture with frames over the places the AI read its values from. */
+.receipt-image {
+  position: relative;
+  display: inline-block;
+}
+
+.receipt-highlights {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+}
+
+.receipt-highlight {
+  position: absolute;
+  left: calc(var(--x) * 100%);
+  top: calc(var(--y) * 100%);
+  width: calc(var(--w) * 100%);
+  height: calc(var(--h) * 100%);
+  border: 2px solid var(--aura-orange-text, orange);
+  background: rgb(255 165 0 / 0.2);
+  border-radius: 2px;
+}

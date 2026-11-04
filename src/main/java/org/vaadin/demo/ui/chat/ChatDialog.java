@@ -21,6 +21,7 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import org.springframework.ai.chat.messages.Message;
 import org.vaadin.demo.ai.AppContext;
+import org.vaadin.demo.ui.ChatReceipts;
 import org.vaadin.demo.ai.TurnStatus;
 
 /**
@@ -150,6 +151,7 @@ public class ChatDialog extends Dialog {
     private void clearHistory() {
         history = new ArrayList<>();
         attachments.clear();
+        ChatReceipts.of(UI.getCurrent()).clear();
         log.clear();
         log.addAssistant(GREETING);
     }

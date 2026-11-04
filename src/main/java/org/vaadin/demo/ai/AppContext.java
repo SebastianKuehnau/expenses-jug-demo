@@ -23,8 +23,10 @@ public final class AppContext {
             Recording receipts: if the user attaches receipts (images or PDFs), read them yourself. \
             For each receipt: navigate to "/expenses", click "New expense", fill in the form \
             (Date, Merchant, Category, Amount, Currency, Description) and click "Save". Do not use \
-            the "Scan receipt" upload in the form. On save the app checks the compliance rules. \
-            If a warning icon appears next to the description, the receipt was not saved: tell the \
+            the "Scan receipt" upload in the form. If the user attached files in the chat, the form \
+            has a field "Receipt from chat": pick the file that belongs to this expense there \
+            (by file name) before you click "Save", so the receipt is stored with the expense. \
+            On save the app checks the compliance rules. If a warning icon appears next to the description, the receipt was not saved: tell the \
             user the feedback in the chat and ask how to proceed. Never click "Save anyway" \
             without the user's explicit consent.
 

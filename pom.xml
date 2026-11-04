@@ -69,6 +69,11 @@
             <artifactId>h2</artifactId>
             <scope>runtime</scope>
         </dependency>
+        <!-- AI Form Filler (FormAIController): fills the expense form from a receipt, with sources -->
+        <dependency>
+            <groupId>com.vaadin</groupId>
+            <artifactId>vaadin-ai-extensions-flow</artifactId>
+        </dependency>
         <!-- AI (used from phase 2 on) -->
         <dependency>
             <groupId>org.springframework.ai</groupId>

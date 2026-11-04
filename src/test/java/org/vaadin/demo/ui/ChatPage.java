@@ -19,6 +19,11 @@ class ChatPage {
         window.findButton().withText("Chat").click();
     }
 
+    /** Drops a file on the upload of the chat window. */
+    void attach(String fileName, String contentType, byte[] data) {
+        window.findUpload().upload(fileName, contentType, data);
+    }
+
     void send(String message) {
         window.findMessageInput().send(message);
     }

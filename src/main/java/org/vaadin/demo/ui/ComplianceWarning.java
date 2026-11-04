@@ -22,6 +22,12 @@ public class ComplianceWarning extends Composite<Icon> {
     private final Popover popover = new Popover();
     private String feedback;
 
+    /** Without this the icon has no glyph and stays invisible, even when it is "shown". */
+    @Override
+    protected Icon initContent() {
+        return VaadinIcon.WARNING.create();
+    }
+
     /** @param onSaveAnyway called with the AI's feedback when the user insists on saving */
     public ComplianceWarning(Consumer<String> onSaveAnyway) {
         Icon icon = getContent();

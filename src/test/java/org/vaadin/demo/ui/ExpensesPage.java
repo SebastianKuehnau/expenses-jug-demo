@@ -33,10 +33,21 @@ class ExpensesPage {
         return rowTexts().stream().anyMatch(row -> row.contains(text));
     }
 
+    /** Saving happens on another thread; wait until the grid has caught up. */
+    boolean showsRowWithEventually(String text) {
+        for (int i = 0; i < 50 && !showsRowWith(text); i++) {
+            window.roundTrip();
+            sleep();
+        }
+        return showsRowWith(text);
+    }
+
     void selectRowWith(String text) {
+        showsRowWithEventually(text);
         for (int i = 0; i < grid().size(); i++) {
             if (rowText(i).contains(text)) {
                 grid().select(i);
+                window.roundTrip();
                 return;
             }
         }
@@ -72,6 +83,10 @@ class ExpensesPage {
     }
 
     /** Saving first asks the AI (in the background), so wait until "Checking…" is over. */
+    void clickCancel() {
+        window.findButton().withText("Cancel").click();
+    }
+
     void clickSave() {
         window.findButton().withText("Save").click();
         for (int i = 0; i < 50 && window.findButton().withText("Checking…").exists(); i++) {
@@ -162,28 +177,41 @@ class ExpensesPage {
 
     // --- filter bar ---
 
+    /** The filter bar is collapsed at first. Open it, like the user (or the AI prompt) does. */
+    void openFilters() {
+        if (!window.findTextField().withLabel("Search").exists()) {
+            window.findButton().withId("filter-toggle").click();
+        }
+    }
+
     void filterByCategory(ExpenseCategory category) {
+        openFilters();
         window.findComboBox(ExpenseCategory.class).withLabel("Category filter").selectItem(category.getLabel());
     }
 
     void filterByText(String text) {
+        openFilters();
         window.findTextField().withLabel("Search").setValue(text);
     }
 
     void filterByDates(LocalDate from, LocalDate to) {
+        openFilters();
         window.findDatePicker().withLabel("Date from").setValue(from);
         window.findDatePicker().withLabel("Date to").setValue(to);
     }
 
     void filterByMinAmount(String amount) {
+        openFilters();
         window.findBigDecimalField().withLabel("Amount from").setValue(new BigDecimal(amount));
     }
 
     void clickReset() {
+        openFilters();
         window.findButton().withText("Reset").click();
     }
 
     void clickSearch() {
+        openFilters();
         window.findButton().withText("Search").click();
     }
 

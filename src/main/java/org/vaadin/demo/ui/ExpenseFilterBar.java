@@ -48,13 +48,19 @@ public class ExpenseFilterBar extends HorizontalLayout {
                 minAmount.getValue(), maxAmount.getValue(), from.getValue(), to.getValue()));
     }
 
-    private void reset() {
+    /** Empties all fields and searches again, so the grid shows everything. */
+    public void reset() {
+        clearFields();
+        search();
+    }
+
+    /** Empties all fields without searching. Used before the AI fills in a new request. */
+    public void clearFields() {
         text.clear();
         category.clear();
         minAmount.clear();
         maxAmount.clear();
         from.clear();
         to.clear();
-        search();
     }
 }

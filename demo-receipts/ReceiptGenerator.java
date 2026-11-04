@@ -4,6 +4,7 @@ import java.awt.Graphics2D;
 import java.awt.RenderingHints;
 import java.awt.image.BufferedImage;
 import java.io.File;
+import java.util.ArrayList;
 import java.util.List;
 import javax.imageio.ImageIO;
 
@@ -25,6 +26,13 @@ public class ReceiptGenerator {
     }
 
     static List<Receipt> receipts() {
+        var all = new ArrayList<>(viennaReceipts());
+        all.addAll(dublinReceipts());
+        return all;
+    }
+
+    /** German receipts from Austria. */
+    static List<Receipt> viennaReceipts() {
         return List.of(
             new Receipt("1-bahnticket-wien-graz.png", "BAHNTICKET", List.of(
                 "Bahnreisen Österreich", "Fahrkarte Nr. 7731 4420 19", "",
@@ -55,6 +63,40 @@ public class ReceiptGenerator {
                 "Von: Wien Hbf", "Nach: Flughafen Wien", "Distanz: 17,4 km", "",
                 "Fahrpreis      39,80 EUR", "inkl. 13% USt", "",
                 "GESAMT         39,80 EUR", "", "Bar bezahlt")));
+    }
+
+    /** English receipts from Dublin (the euro is Ireland's currency, so the amounts fit the app). */
+    static List<Receipt> dublinReceipts() {
+        return List.of(
+            new Receipt("6-train-ticket-dublin-galway.png", "TRAIN TICKET", List.of(
+                "Emerald Rail Ireland", "Ticket No. 4410 2873 06", "",
+                "Dublin Heuston  ->  Galway Ceannt", "Standard class, return leg",
+                "Date: 14 Oct 2026", "",
+                "TOTAL             42.50 EUR", "incl. 13.5% VAT", "", "Paid by credit card")),
+            new Receipt("7-hotel-invoice-dublin.png", "HOTEL INVOICE", List.of(
+                "The Liffey Bridge Hotel", "14 Eden Quay, Dublin 1, D01 X2Y4",
+                "Invoice No. LB-2026-30518", "",
+                "Guest: M. Kuehn", "Check-in 14 Oct 2026, check-out 15 Oct 2026", "",
+                "1 night single room       149.00 EUR", "Breakfast                   19.00 EUR", "",
+                "TOTAL (incl. 13.5% VAT)   168.00 EUR", "", "Payment: credit card")),
+            new Receipt("8-pub-dinner-with-pints.png", "RECEIPT", List.of(
+                "The Liffey Arms", "22 Crown Alley, Dublin 2, D02 K7P3", "Check 8841   Table 12", "",
+                "Date: 14 Oct 2026  20:15", "",
+                "2x Irish stew           38.00", "2x Starter              16.00",
+                "2x Apple tart           14.00", "2x Pint of stout        12.40", "",
+                "SUBTOTAL                80.40 EUR", "Service charge (12.5%)  10.05 EUR",
+                "TOTAL                   90.45 EUR", "", "Thank you for dining with us!")),
+            new Receipt("9-cloud-hosting-invoice.png", "INVOICE", List.of(
+                "Celtic Cloud Ltd", "12 Grand Canal Dock, Dublin 4, D04 R5T2", "Invoice No. CC-440217", "",
+                "Date: 1 Oct 2026", "",
+                "Cloud Hosting Pro, annual plan", "1 account   1 Oct 2026 - 30 Sep 2027", "",
+                "Net            405.69 EUR", "23% VAT         93.31 EUR", "",
+                "TOTAL          499.00 EUR", "", "Payment by direct debit")),
+            new Receipt("10-taxi-dublin.png", "TAXI RECEIPT", List.of(
+                "Dublin Radio Cabs", "Trip No. 90412", "", "Date: 16 Oct 2026   07:40",
+                "From: Heuston Station", "To: Dublin Airport", "Distance: 14.2 km", "",
+                "Fare           34.50 EUR", "incl. 13.5% VAT", "",
+                "TOTAL          34.50 EUR", "", "Paid by card")));
     }
 
     static void draw(Receipt r) throws Exception {

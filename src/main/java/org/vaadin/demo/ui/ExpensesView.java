@@ -23,29 +23,29 @@ import org.vaadin.demo.expense.ExpenseService;
 import org.vaadin.demo.receipt.ReceiptExtractionService;
 
 @Route(value = "expenses", layout = MainLayout.class)
-@PageTitle("Ausgaben")
+@PageTitle("Expenses")
 public class ExpensesView extends VerticalLayout {
 
     private static final int DESCRIPTION_LENGTH = 50;
 
     /**
      * How the AI should operate THIS screen. {@code %s} is replaced by what the user typed.
-     * The AI does not write a query. It fills the visible filter fields and clicks "Suchen",
+     * The AI does not write a query. It fills the visible filter fields and clicks "Search",
      * so the user sees what was filtered, can correct it, and normal validation still applies.
      */
     private static final String AI_GOAL = """
-            Der Nutzer beschreibt in eigenen Worten, welche Ausgaben er sehen will. Setze in der \
-            Filterleiste nur die Felder, die die Anfrage nahelegt, leere alle anderen Felder und \
-            klicke dann auf "Suchen".
+            The user describes in their own words which expenses they want to see. Set only the \
+            fields in the filter bar that the request implies, clear all other fields, then \
+            click "Search".
 
-            Zuordnung:
-            - Händler oder Stichwort: Feld "Suche"
-            - Art der Ausgabe (Reise, Bewirtung, Unterkunft, Büro, Software, Weiterbildung): "Kategorie-Filter"
-            - Beträge: "Betrag von" und "Betrag bis" (nur die Zahl, ohne Währung)
-            - Zeitraum: "Datum von" und "Datum bis". Relative Angaben wie "letzter Monat" oder \
-            "dieses Quartal" beziehen sich auf das heutige Datum.
+            Mapping:
+            - Merchant or keyword: field "Search"
+            - Kind of expense (Travel, Meals, Accommodation, Office, Software, Training): "Category filter"
+            - Amounts: "Amount from" and "Amount to" (the number only, no currency)
+            - Period: "Date from" and "Date to". Relative terms like "last month" or \
+            "this quarter" refer to today's date.
 
-            Erfinde keine Bedingungen, die der Nutzer nicht genannt hat. Anfrage: "%s"
+            Do not invent conditions the user did not mention. Request: "%s"
             """;
 
     private final ExpenseService service;
@@ -64,15 +64,15 @@ public class ExpensesView extends VerticalLayout {
     }
 
     private AiGoalBar createAiBar(UiAssistant assistant, ExpenseFilterBar filterBar) {
-        var aiBar = new AiGoalBar(assistant, "Filtern", AI_GOAL);
-        aiBar.setPlaceholder("z. B. Bewirtung über 100 € im Oktober");
+        var aiBar = new AiGoalBar(assistant, "Filter", AI_GOAL);
+        aiBar.setPlaceholder("e.g. meals over €100 in October");
         // The AI may only see and touch the filter bar, never the grid or the form.
         aiBar.setScope(AgentScope.within(filterBar));
         return aiBar;
     }
 
     private Button createNewButton() {
-        return new Button("Neue Ausgabe", VaadinIcon.PLUS.create(), e -> {
+        return new Button("New expense", VaadinIcon.PLUS.create(), e -> {
             grid.deselectAll();
             openForm(newExpense());
         });
@@ -87,11 +87,11 @@ public class ExpensesView extends VerticalLayout {
     }
 
     private void configureGrid() {
-        var date = grid.addColumn(Expense::getDate).setHeader("Datum").setSortProperty("date");
-        grid.addColumn(Expense::getMerchant).setHeader("Händler").setSortProperty("merchant");
-        grid.addColumn(e -> e.getCategory().getLabel()).setHeader("Kategorie").setSortProperty("category");
-        grid.addColumn(this::shortDescription).setHeader("Beschreibung");
-        grid.addColumn(e -> Formats.money(e.getAmount())).setHeader("Betrag")
+        var date = grid.addColumn(Expense::getDate).setHeader("Date").setSortProperty("date");
+        grid.addColumn(Expense::getMerchant).setHeader("Merchant").setSortProperty("merchant");
+        grid.addColumn(e -> e.getCategory().getLabel()).setHeader("Category").setSortProperty("category");
+        grid.addColumn(this::shortDescription).setHeader("Description");
+        grid.addColumn(e -> Formats.money(e.getAmount())).setHeader("Amount")
                 .setTextAlign(ColumnTextAlign.END).setSortProperty("amount");
         grid.addComponentColumn(this::createWarningIcon).setHeader("").setWidth("4rem").setFlexGrow(0);
 

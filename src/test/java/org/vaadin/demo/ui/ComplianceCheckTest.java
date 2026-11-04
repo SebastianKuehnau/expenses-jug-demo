@@ -29,7 +29,7 @@ import org.vaadin.demo.expense.ExpenseService;
 @DirtiesContext(classMode = DirtiesContext.ClassMode.AFTER_EACH_TEST_METHOD)
 class ComplianceCheckTest {
 
-    private static final String FEEDBACK = "Regel 2: Anlass und Teilnehmer fehlen.";
+    private static final String FEEDBACK = "Rule 2: occasion and attendees are missing.";
 
     @Autowired
     ApplicationContext spring;

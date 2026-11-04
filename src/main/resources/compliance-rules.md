@@ -1,7 +1,7 @@
-1. Keine Ausgaben für Alkohol, außer bei Bewirtung von Kunden.
-2. Bewirtung (Kategorie Bewirtung) über 50 € braucht Anlass und Teilnehmer in der Beschreibung.
-3. Hotel maximal 180 € pro Nacht (Wien 200 €).
-4. Flüge unter 600 km nur mit Begründung; die Bahn ist Standard.
-5. Software-Abos nur mit Angabe des Projekts.
-6. Keine privaten Ausgaben (Geschenke an sich selbst, Freizeit, Familie).
-7. Die Beschreibung muss den geschäftlichen Zweck erkennen lassen („diverses“ reicht nicht).
+1. No expenses for alcohol, except when entertaining customers.
+2. Meals (category Meals) over €50 need the occasion and attendees in the description.
+3. Hotel at most €180 per night (Vienna €200).
+4. Flights under 600 km only with a justification; the train is the default.
+5. Software subscriptions only with the project named.
+6. No private expenses (gifts to yourself, leisure, family).
+7. The description must show the business purpose ("miscellaneous" is not enough).

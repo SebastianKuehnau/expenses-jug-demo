@@ -14,7 +14,7 @@ import java.util.function.Consumer;
 
 /**
  * A yellow warning icon. Click it to read the AI's feedback in a popover and decide:
- * close and fix the input, or "Trotzdem speichern".
+ * close and fix the input, or "Save anyway".
  */
 public class ComplianceWarning extends Composite<Icon> {
 
@@ -27,11 +27,11 @@ public class ComplianceWarning extends Composite<Icon> {
         Icon icon = getContent();
         icon.setVisible(false);
         icon.setColor("var(--aura-orange-text)");
-        icon.setTooltipText("Compliance-Hinweis — klicken für Details");
+        icon.setTooltipText("Compliance hint: click for details");
 
         popover.setTarget(icon);
         popover.setOpenOnClick(true);
-        popover.add(new VerticalLayout(new H4("Compliance-Hinweis"), feedbackText,
+        popover.add(new VerticalLayout(new H4("Compliance hint"), feedbackText,
                 createButtons(onSaveAnyway)));
     }
 
@@ -48,8 +48,8 @@ public class ComplianceWarning extends Composite<Icon> {
     }
 
     private HorizontalLayout createButtons(Consumer<String> onSaveAnyway) {
-        var close = new Button("Schließen", e -> popover.close());
-        var saveAnyway = new Button("Trotzdem speichern", e -> {
+        var close = new Button("Close", e -> popover.close());
+        var saveAnyway = new Button("Save anyway", e -> {
             popover.close();
             onSaveAnyway.accept(feedback);
         });

@@ -17,14 +17,14 @@ public class ComplianceService {
     private static final Logger log = LoggerFactory.getLogger(ComplianceService.class);
 
     private static final String SYSTEM_PROMPT = """
-            Du prüfst Spesenbelege auf die Einhaltung dieser Regeln:
+            You check expense receipts against these rules:
 
             %s
 
-            Melde nur klare Verstöße. Wenn ein Beleg konform ist, ist compliant true und \
-            feedback leer. Sonst ist compliant false und feedback höchstens zwei kurze Sätze \
-            auf Deutsch: nenne die verletzte Regel mit Nummer und sage, was in der Beschreibung \
-            fehlt oder geändert werden muss.
+            Report clear violations only. If a receipt complies, compliant is true and \
+            feedback is empty. Otherwise compliant is false and feedback is at most two short sentences \
+            in English: name the violated rule by number and say what in the description \
+            is missing or has to change.
             """;
 
     private final ChatClient chatClient;
@@ -57,11 +57,11 @@ public class ComplianceService {
 
     private String describe(Expense expense) {
         return """
-                Datum: %s
-                Händler: %s
-                Kategorie: %s
-                Betrag: %s %s
-                Beschreibung: %s
+                Date: %s
+                Merchant: %s
+                Category: %s
+                Amount: %s %s
+                Description: %s
                 """.formatted(expense.getDate(), expense.getMerchant(),
                 expense.getCategory().getLabel(), expense.getAmount(), expense.getCurrency(),
                 expense.getDescription());

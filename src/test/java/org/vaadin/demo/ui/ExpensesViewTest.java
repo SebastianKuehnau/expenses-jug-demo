@@ -67,7 +67,7 @@ class ExpensesViewTest {
                 "Taxi zum Kundentermin");
         employee.clickSave();
 
-        assertEquals("Ausgabe gespeichert", employee.notification());
+        assertEquals("Expense saved", employee.notification());
         assertEquals(before + 1, employee.rowCount());
         assertTrue(employee.showsRowWith("Taxi Wien"));
     }
@@ -79,20 +79,20 @@ class ExpensesViewTest {
         employee.enterAmount("301.00");
         employee.clickSave();
 
-        assertEquals("Ausgabe gespeichert", employee.notification());
-        assertTrue(employee.showsRowWith("€ 301,00"));
+        assertEquals("Expense saved", employee.notification());
+        assertTrue(employee.showsRowWith("€301.00"));
     }
 
     @Test
     void delete_expense() {
         int before = employee.rowCount();
-        employee.selectRowWith("Notizbücher");
+        employee.selectRowWith("Notebooks");
 
         employee.clickDelete();
         employee.confirmDeletion();
 
         assertEquals(before - 1, employee.rowCount());
-        assertFalse(employee.showsRowWith("Notizbücher"));
+        assertFalse(employee.showsRowWith("Notebooks"));
     }
 
     @Test
@@ -105,7 +105,7 @@ class ExpensesViewTest {
         employee.clickSave();
 
         assertNotNull(employee.amountError());
-        assertEquals("Der Betrag muss größer als 0 sein", employee.amountError());
+        assertEquals("The amount must be greater than 0", employee.amountError());
         assertEquals(before, expenses.count(ExpenseFilter.NONE));
     }
 
@@ -120,7 +120,7 @@ class ExpensesViewTest {
         assertFalse(employee.showsRowWith("ÖBB"));
     }
 
-    /** The AI fills exactly these fields and clicks "Suchen"; here the test plays the AI. */
+    /** The AI fills exactly these fields and clicks "Search"; here the test plays the AI. */
     @Test
     void filter_by_merchant_text() {
         employee.filterByText("ÖBB");

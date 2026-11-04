@@ -9,8 +9,8 @@ import java.util.List;
 /** The conversation: Vaadin's MessageList, with the user's messages on the right. */
 class ChatLog extends MessageList {
 
-    private static final String USER = "Du";
-    private static final String ASSISTANT = "Assistent";
+    private static final String USER = "You";
+    private static final String ASSISTANT = "Assistant";
 
     ChatLog() {
         setMarkdown(true); // assistant answers contain lists, bold text, ...

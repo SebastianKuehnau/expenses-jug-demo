@@ -27,15 +27,15 @@ import org.vaadin.demo.receipt.ReceiptExtractionService;
 /** Edit form for one expense. Tells its parent via {@code onDone} when the user is finished. */
 public class ExpenseForm extends VerticalLayout {
 
-    private final DatePicker date = new DatePicker("Datum");
-    private final TextField merchant = new TextField("Händler");
-    private final ComboBox<ExpenseCategory> category = new ComboBox<>("Kategorie");
-    private final BigDecimalField amount = new BigDecimalField("Betrag");
-    private final TextField currency = new TextField("Währung");
-    private final TextArea description = new TextArea("Beschreibung");
+    private final DatePicker date = new DatePicker("Date");
+    private final TextField merchant = new TextField("Merchant");
+    private final ComboBox<ExpenseCategory> category = new ComboBox<>("Category");
+    private final BigDecimalField amount = new BigDecimalField("Amount");
+    private final TextField currency = new TextField("Currency");
+    private final TextArea description = new TextArea("Description");
     private final FormLayout fields = new FormLayout();
-    private final Button save = new Button("Speichern", e -> checkAndSave());
-    private final Button delete = new Button("Löschen", e -> confirmDelete());
+    private final Button save = new Button("Save", e -> checkAndSave());
+    private final Button delete = new Button("Delete", e -> confirmDelete());
     private final ComplianceWarning warning = new ComplianceWarning(this::saveAnyway);
 
     /**
@@ -74,7 +74,7 @@ public class ExpenseForm extends VerticalLayout {
 
     /**
      * Puts what the AI read into the fields. It is only a suggestion: nothing is saved
-     * until the user clicks "Speichern" (which also runs the compliance check).
+     * until the user clicks "Save" (which also runs the compliance check).
      */
     private void fillFrom(ReceiptData receipt) {
         if (receipt.date() != null) date.setValue(receipt.date());
@@ -94,7 +94,7 @@ public class ExpenseForm extends VerticalLayout {
     private HorizontalLayout createButtons() {
         save.addThemeVariants(ButtonVariant.PRIMARY);
         delete.addThemeVariants(ButtonVariant.ERROR);
-        return new HorizontalLayout(save, delete, new Button("Abbrechen", e -> onDone.run()));
+        return new HorizontalLayout(save, delete, new Button("Cancel", e -> onDone.run()));
     }
 
     /** Validate, then let the AI check the rules. Only a compliant expense is saved right away. */
@@ -116,7 +116,7 @@ public class ExpenseForm extends VerticalLayout {
     private void afterCheck(ComplianceResult result, Throwable error) {
         setChecking(false);
         if (error != null) {
-            Notification.show("Die Compliance-Prüfung ist fehlgeschlagen. Bitte noch einmal versuchen.");
+            Notification.show("The compliance check failed. Please try again.");
         } else if (result.compliant()) {
             saveExpense(false, null);
         } else {
@@ -124,7 +124,7 @@ public class ExpenseForm extends VerticalLayout {
         }
     }
 
-    /** "Trotzdem speichern": no new check, but we remember that the warning was ignored. */
+    /** "Save anyway": no new check, but we remember that the warning was ignored. */
     private void saveAnyway(String feedback) {
         saveExpense(true, feedback);
     }
@@ -138,26 +138,26 @@ public class ExpenseForm extends VerticalLayout {
         expense.setComplianceOverridden(overridden);
         expense.setComplianceNote(note);
         service.save(expense);
-        Notification.show("Ausgabe gespeichert");
+        Notification.show("Expense saved");
         onDone.run();
     }
 
     private void setChecking(boolean checking) {
         fields.setEnabled(!checking);
         save.setEnabled(!checking);
-        save.setText(checking ? "Prüfe…" : "Speichern");
+        save.setText(checking ? "Checking…" : "Save");
     }
 
     private void confirmDelete() {
         var dialog = new ConfirmDialog();
-        dialog.setHeader("Ausgabe löschen?");
-        dialog.setText("Diese Ausgabe wird endgültig gelöscht.");
+        dialog.setHeader("Delete expense?");
+        dialog.setText("This expense will be deleted permanently.");
         dialog.setCancelable(true);
-        dialog.setCancelText("Abbrechen");
-        dialog.setConfirmText("Löschen");
+        dialog.setCancelText("Cancel");
+        dialog.setConfirmText("Delete");
         dialog.addConfirmListener(e -> {
             service.delete(expense);
-            Notification.show("Ausgabe gelöscht");
+            Notification.show("Expense deleted");
             onDone.run();
         });
         dialog.open();

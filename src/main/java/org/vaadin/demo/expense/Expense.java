@@ -25,30 +25,30 @@ public class Expense {
     @GeneratedValue
     private Long id;
 
-    @NotNull(message = "Pflichtfeld")
-    @PastOrPresent(message = "Das Datum darf nicht in der Zukunft liegen")
+    @NotNull(message = "Required")
+    @PastOrPresent(message = "The date must not be in the future")
     private LocalDate date;
 
-    @NotBlank(message = "Pflichtfeld")
+    @NotBlank(message = "Required")
     private String merchant;
 
-    @NotBlank(message = "Pflichtfeld")
+    @NotBlank(message = "Required")
     @Size(max = 500, message = "Maximal 500 Zeichen")
     @Column(length = 500)
     private String description;
 
-    @NotNull(message = "Pflichtfeld")
+    @NotNull(message = "Required")
     @Enumerated(EnumType.STRING)
     private ExpenseCategory category;
 
-    @NotNull(message = "Pflichtfeld")
-    @DecimalMin(value = "0", inclusive = false, message = "Der Betrag muss größer als 0 sein")
+    @NotNull(message = "Required")
+    @DecimalMin(value = "0", inclusive = false, message = "The amount must be greater than 0")
     private BigDecimal amount;
 
-    @NotBlank(message = "Pflichtfeld")
+    @NotBlank(message = "Required")
     private String currency = "EUR";
 
-    /** true = the compliance warning was ignored ("Trotzdem speichern"). */
+    /** true = the compliance warning was ignored ("Save anyway"). */
     private boolean complianceOverridden;
 
     private String complianceNote;

@@ -56,25 +56,25 @@ class ExpensesPage {
     // --- form ---
 
     void clickNewExpense() {
-        window.findButton().withText("Neue Ausgabe").click();
+        window.findButton().withText("New expense").click();
     }
 
     void fillForm(LocalDate date, String merchant, ExpenseCategory category, String amount, String description) {
-        window.findDatePicker().withLabel("Datum").setValue(date);
-        window.findTextField().withLabel("Händler").setValue(merchant);
-        window.findComboBox(ExpenseCategory.class).withLabel("Kategorie").selectItem(category.getLabel());
+        window.findDatePicker().withLabel("Date").setValue(date);
+        window.findTextField().withLabel("Merchant").setValue(merchant);
+        window.findComboBox(ExpenseCategory.class).withLabel("Category").selectItem(category.getLabel());
         enterAmount(amount);
-        window.findTextArea().withLabel("Beschreibung").setValue(description);
+        window.findTextArea().withLabel("Description").setValue(description);
     }
 
     void enterAmount(String amount) {
-        window.findBigDecimalField().withLabel("Betrag").setValue(new BigDecimal(amount));
+        window.findBigDecimalField().withLabel("Amount").setValue(new BigDecimal(amount));
     }
 
-    /** Saving first asks the AI (in the background), so wait until "Prüfe…" is over. */
+    /** Saving first asks the AI (in the background), so wait until "Checking…" is over. */
     void clickSave() {
-        window.findButton().withText("Speichern").click();
-        for (int i = 0; i < 50 && window.findButton().withText("Prüfe…").exists(); i++) {
+        window.findButton().withText("Save").click();
+        for (int i = 0; i < 50 && window.findButton().withText("Checking…").exists(); i++) {
             window.roundTrip();
             sleep();
         }
@@ -91,7 +91,7 @@ class ExpensesPage {
 
     // --- receipt scan ---
 
-    /** Drops a receipt on "Beleg scannen". The AI reads it in the background: wait for the result. */
+    /** Drops a receipt on "Scan receipt". The AI reads it in the background: wait for the result. */
     void scanReceipt(byte[] image) {
         window.findUpload().upload("beleg.png", "image/png", image);
         for (int i = 0; i < 50 && merchant().isEmpty(); i++) {
@@ -102,20 +102,20 @@ class ExpensesPage {
     }
 
     String merchant() {
-        return window.findTextField().withLabel("Händler").component().getValue();
+        return window.findTextField().withLabel("Merchant").component().getValue();
     }
 
     String amountText() {
-        return String.valueOf(window.findBigDecimalField().withLabel("Betrag").component().getValue());
+        return String.valueOf(window.findBigDecimalField().withLabel("Amount").component().getValue());
     }
 
     String category() {
-        return window.findComboBox(ExpenseCategory.class).withLabel("Kategorie").component()
+        return window.findComboBox(ExpenseCategory.class).withLabel("Category").component()
                 .getValue().getLabel();
     }
 
     String description() {
-        return window.findTextArea().withLabel("Beschreibung").component().getValue();
+        return window.findTextArea().withLabel("Description").component().getValue();
     }
 
     // --- compliance warning ---
@@ -136,16 +136,16 @@ class ExpensesPage {
     }
 
     void clickSaveAnyway() {
-        window.findButton().withText("Trotzdem speichern").click();
+        window.findButton().withText("Save anyway").click();
         window.roundTrip();
     }
 
     void changeDescriptionTo(String description) {
-        window.findTextArea().withLabel("Beschreibung").setValue(description);
+        window.findTextArea().withLabel("Description").setValue(description);
     }
 
     void clickDelete() {
-        window.findButton().withText("Löschen").click();
+        window.findButton().withText("Delete").click();
     }
 
     void confirmDeletion() {
@@ -153,7 +153,7 @@ class ExpensesPage {
     }
 
     String amountError() {
-        return window.findBigDecimalField().withLabel("Betrag").component().getErrorMessage();
+        return window.findBigDecimalField().withLabel("Amount").component().getErrorMessage();
     }
 
     String notification() {
@@ -163,28 +163,28 @@ class ExpensesPage {
     // --- filter bar ---
 
     void filterByCategory(ExpenseCategory category) {
-        window.findComboBox(ExpenseCategory.class).withLabel("Kategorie-Filter").selectItem(category.getLabel());
+        window.findComboBox(ExpenseCategory.class).withLabel("Category filter").selectItem(category.getLabel());
     }
 
     void filterByText(String text) {
-        window.findTextField().withLabel("Suche").setValue(text);
+        window.findTextField().withLabel("Search").setValue(text);
     }
 
     void filterByDates(LocalDate from, LocalDate to) {
-        window.findDatePicker().withLabel("Datum von").setValue(from);
-        window.findDatePicker().withLabel("Datum bis").setValue(to);
+        window.findDatePicker().withLabel("Date from").setValue(from);
+        window.findDatePicker().withLabel("Date to").setValue(to);
     }
 
     void filterByMinAmount(String amount) {
-        window.findBigDecimalField().withLabel("Betrag von").setValue(new BigDecimal(amount));
+        window.findBigDecimalField().withLabel("Amount from").setValue(new BigDecimal(amount));
     }
 
     void clickReset() {
-        window.findButton().withText("Zurücksetzen").click();
+        window.findButton().withText("Reset").click();
     }
 
     void clickSearch() {
-        window.findButton().withText("Suchen").click();
+        window.findButton().withText("Search").click();
     }
 
     private GridLocator<Expense> grid() {

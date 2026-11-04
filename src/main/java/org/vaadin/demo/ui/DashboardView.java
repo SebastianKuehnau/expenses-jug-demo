@@ -19,19 +19,19 @@ import org.vaadin.demo.expense.ExpenseCategory;
 import org.vaadin.demo.expense.ExpenseService;
 
 @Route(value = "", layout = MainLayout.class)
-@PageTitle("Übersicht")
+@PageTitle("Overview")
 public class DashboardView extends VerticalLayout {
 
     public DashboardView(ExpenseService service) {
         List<Expense> all = service.findAll();
-        add(new H2("Übersicht"), createCards(all));
+        add(new H2("Overview"), createCards(all));
     }
 
     private HorizontalLayout createCards(List<Expense> all) {
         var cards = new HorizontalLayout();
         cards.setWrap(true);
-        cards.add(card("Summe laufender Monat", Formats.money(sumThisMonth(all))));
-        cards.add(card("Anzahl Belege", String.valueOf(all.size())));
+        cards.add(card("Total this month", Formats.money(sumThisMonth(all))));
+        cards.add(card("Number of receipts", String.valueOf(all.size())));
         sumsByCategory(all).forEach((category, sum) ->
                 cards.add(card(category.getLabel(), Formats.money(sum))));
         return cards;

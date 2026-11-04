@@ -26,7 +26,7 @@ import org.vaadin.demo.expense.ExpenseService;
 import org.vaadin.demo.receipt.ReceiptData;
 import org.vaadin.demo.receipt.ReceiptExtractionService;
 
-/** "Beleg scannen" in the expense form. The AI that reads the receipt is replaced by a fake. */
+/** "Scan receipt" in the expense form. The AI that reads the receipt is replaced by a fake. */
 @SpringBootTest
 @DirtiesContext(classMode = DirtiesContext.ClassMode.AFTER_EACH_TEST_METHOD)
 class ReceiptScanTest {
@@ -51,7 +51,7 @@ class ReceiptScanTest {
         when(extraction.isAvailable()).thenReturn(true);
         when(extraction.extract(any(), any())).thenReturn(new ReceiptData(
                 LocalDate.now().minusDays(3), "ÖBB", new BigDecimal("78.60"), "EUR",
-                ExpenseCategory.TRAVEL, "Railjet Wien – Graz"));
+                ExpenseCategory.TRAVEL, "Railjet Vienna – Graz"));
         when(compliance.check(any())).thenReturn(new ComplianceResult(true, null));
         app = SpringBrowserlessApplicationContext.create(spring, ExpensesView.class);
         employee = new ExpensesPage(app.newUser().newWindow());
@@ -71,8 +71,8 @@ class ReceiptScanTest {
 
         assertEquals("ÖBB", employee.merchant());
         assertEquals("78.60", employee.amountText());
-        assertEquals("Reise", employee.category());
-        assertEquals("Railjet Wien – Graz", employee.description());
+        assertEquals("Travel", employee.category());
+        assertEquals("Railjet Vienna – Graz", employee.description());
         assertEquals(expensesBefore, expenses.count(ExpenseFilter.NONE));
     }
 
@@ -84,6 +84,6 @@ class ReceiptScanTest {
 
         assertEquals(expensesBefore + 1, expenses.count(ExpenseFilter.NONE));
         verify(compliance).check(any());
-        assertTrue(employee.showsRowWith("Railjet Wien"));
+        assertTrue(employee.showsRowWith("Railjet Vienna"));
     }
 }

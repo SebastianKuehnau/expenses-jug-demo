@@ -37,7 +37,7 @@ class ChatTest {
     void anAiIsConfigured() {
         when(aiProperties.isEnabled()).thenReturn(true);
         when(presenter.respond(any(), any(), any(), any(), any(), any(), any(), any()))
-                .thenReturn(new TurnResult("Die Regeln findest du unter **Compliance-Regeln**.",
+                .thenReturn(new TurnResult("You can find the rules under **Compliance rules**.",
                         List.of(), List.of(), true, "completed", null));
         app = SpringBrowserlessApplicationContext.create(spring, DashboardView.class);
         var window = app.newUser().newWindow();
@@ -54,16 +54,16 @@ class ChatTest {
     void employeeOpensTheChatAndIsGreeted() {
         employee.clickChatButton();
 
-        assertTrue(employee.showsMessage("Sag mir, was ich in der Expense-App für dich tun soll"));
+        assertTrue(employee.showsMessage("Tell me what I can do for you in the expense app"));
     }
 
     @Test
     void employeeAsksAQuestionAndGetsAnAnswer() throws InterruptedException {
         employee.clickChatButton();
 
-        employee.send("Wo sehe ich die Compliance-Regeln?");
+        employee.send("Where can I see the compliance rules?");
 
-        assertTrue(employee.showsMessageEventually("Die Regeln findest du unter"));
+        assertTrue(employee.showsMessageEventually("You can find the rules under"));
     }
 
     @Test

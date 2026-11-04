@@ -25,7 +25,7 @@ class ChatAttachments {
         upload.setMaxFiles(5);
         upload.setMaxFileSize(20 * 1024 * 1024);
         upload.setWidthFull();
-        upload.setDropLabel(new Span("Belege hier ablegen (Bild oder PDF)"));
+        upload.setDropLabel(new Span("Drop receipts here (image or PDF)"));
         upload.setDropLabelIcon(new Icon(VaadinIcon.CLOUD_UPLOAD_O));
         // Removing a file chip in the upload also removes the attachment.
         upload.addFileRemovedListener(e -> pending.removeIf(a -> a.filename().equals(e.getFileName())));

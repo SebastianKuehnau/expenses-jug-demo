@@ -12,20 +12,20 @@ import java.util.function.Consumer;
 import org.vaadin.demo.expense.ExpenseCategory;
 import org.vaadin.demo.expense.ExpenseFilter;
 
-/** The search fields above the grid. "Suchen" hands the typed values over as an {@link ExpenseFilter}. */
+/** The search fields above the grid. "Search" hands the typed values over as an {@link ExpenseFilter}. */
 public class ExpenseFilterBar extends HorizontalLayout {
 
-    private final TextField text = new TextField("Suche");
-    private final ComboBox<ExpenseCategory> category = new ComboBox<>("Kategorie-Filter");
-    private final BigDecimalField minAmount = new BigDecimalField("Betrag von");
-    private final BigDecimalField maxAmount = new BigDecimalField("Betrag bis");
-    private final DatePicker from = new DatePicker("Datum von");
-    private final DatePicker to = new DatePicker("Datum bis");
+    private final TextField text = new TextField("Search");
+    private final ComboBox<ExpenseCategory> category = new ComboBox<>("Category filter");
+    private final BigDecimalField minAmount = new BigDecimalField("Amount from");
+    private final BigDecimalField maxAmount = new BigDecimalField("Amount to");
+    private final DatePicker from = new DatePicker("Date from");
+    private final DatePicker to = new DatePicker("Date to");
     private final Consumer<ExpenseFilter> onSearch;
 
     public ExpenseFilterBar(Consumer<ExpenseFilter> onSearch) {
         this.onSearch = onSearch;
-        text.setPlaceholder("Händler oder Beschreibung");
+        text.setPlaceholder("Merchant or description");
         category.setItems(ExpenseCategory.values());
         category.setItemLabelGenerator(ExpenseCategory::getLabel);
         setDefaultVerticalComponentAlignment(FlexComponent.Alignment.END);
@@ -34,13 +34,13 @@ public class ExpenseFilterBar extends HorizontalLayout {
     }
 
     private Button createSearchButton() {
-        var button = new Button("Suchen", e -> search());
+        var button = new Button("Search", e -> search());
         button.addThemeVariants(ButtonVariant.PRIMARY);
         return button;
     }
 
     private Button createResetButton() {
-        return new Button("Zurücksetzen", e -> reset());
+        return new Button("Reset", e -> reset());
     }
 
     private void search() {

@@ -8,10 +8,10 @@ import com.vaadin.flow.router.Route;
 import org.vaadin.demo.compliance.ComplianceRules;
 
 @Route(value = "rules", layout = MainLayout.class)
-@PageTitle("Compliance-Regeln")
+@PageTitle("Compliance rules")
 public class RulesView extends VerticalLayout {
 
     public RulesView(ComplianceRules rules) {
-        add(new H2("Compliance-Regeln"), new Markdown(rules.text()));
+        add(new H2("Compliance rules"), new Markdown(rules.text()));
     }
 }

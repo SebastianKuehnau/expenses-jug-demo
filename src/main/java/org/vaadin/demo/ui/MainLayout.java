@@ -41,9 +41,9 @@ public class MainLayout extends AppLayout {
 
     private SideNav createNavigation() {
         var nav = new SideNav();
-        nav.addItem(new SideNavItem("Übersicht", DashboardView.class, VaadinIcon.DASHBOARD.create()));
-        nav.addItem(new SideNavItem("Ausgaben", ExpensesView.class, VaadinIcon.WALLET.create()));
-        nav.addItem(new SideNavItem("Compliance-Regeln", RulesView.class, VaadinIcon.CLIPBOARD_CHECK.create()));
+        nav.addItem(new SideNavItem("Overview", DashboardView.class, VaadinIcon.DASHBOARD.create()));
+        nav.addItem(new SideNavItem("Expenses", ExpensesView.class, VaadinIcon.WALLET.create()));
+        nav.addItem(new SideNavItem("Compliance rules", RulesView.class, VaadinIcon.CLIPBOARD_CHECK.create()));
         return nav;
     }
 }

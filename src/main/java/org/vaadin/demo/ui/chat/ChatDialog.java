@@ -29,13 +29,13 @@ import org.vaadin.demo.ai.TurnStatus;
  */
 public class ChatDialog extends Dialog {
 
-    private static final String GREETING = "Hallo! Sag mir, was ich in der Expense-App für dich tun soll.";
+    private static final String GREETING = "Hello! Tell me what I can do for you in the expense app.";
 
     private final TextPresenterService presenter;
     private final ChatLog log = new ChatLog();
     private final ChatAttachments attachments = new ChatAttachments();
     private final MessageInput input = new MessageInput(e -> startTurn(e.getValue()));
-    private final Button stop = new Button("Stopp", VaadinIcon.STOP.create(), e -> cancelTurn());
+    private final Button stop = new Button("Stop", VaadinIcon.STOP.create(), e -> cancelTurn());
     private final Button clear = new Button(VaadinIcon.ERASER.create(), e -> clearHistory());
     private final ExecutorService executor = Executors.newSingleThreadExecutor(
             runnable -> Thread.ofPlatform().daemon().name("chat").unstarted(runnable));
@@ -72,11 +72,11 @@ public class ChatDialog extends Dialog {
         // Start in the bottom right corner (top/left take any CSS length).
         setTop("calc(100vh - 600px)");
         setLeft("calc(100vw - 460px)");
-        setHeaderTitle("Assistent");
-        clear.setTooltipText("Verlauf löschen");
-        clear.setAriaLabel("Verlauf löschen");
+        setHeaderTitle("Assistant");
+        clear.setTooltipText("Clear history");
+        clear.setAriaLabel("Clear history");
         var close = new Button(VaadinIcon.CLOSE.create(), e -> close());
-        close.setAriaLabel("Schließen");
+        close.setAriaLabel("Close");
         for (Button button : List.of(clear, close)) {
             button.addThemeVariants(ButtonVariant.TERTIARY);
             getHeader().add(button);
@@ -94,7 +94,7 @@ public class ChatDialog extends Dialog {
     private void startTurn(String text) {
         List<Attachment> files = attachments.takeAll();
         log.addUser(text, files.stream().map(Attachment::filename).toList());
-        MessageListItem thinking = log.addStatus("Denke nach…");
+        MessageListItem thinking = log.addStatus("Thinking…");
         setTurnRunning(true);
 
         // Read on the UI thread: the background thread below has no UI of its own.
@@ -138,7 +138,7 @@ public class ChatDialog extends Dialog {
     private void failTurn(MessageListItem thinking, RuntimeException e) {
         log.remove(thinking);
         setTurnRunning(false);
-        log.addError(e.getMessage() == null ? "Der Assistent ist fehlgeschlagen." : e.getMessage());
+        log.addError(e.getMessage() == null ? "The assistant failed." : e.getMessage());
     }
 
     private void cancelTurn() {

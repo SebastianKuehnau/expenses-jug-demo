@@ -35,8 +35,8 @@ class OverviewAndRulesTest {
 
         employee.navigate(DashboardView.class);
 
-        assertTrue(employee.findCard().withCondition(c -> "Anzahl Belege".equals(c.getTitleAsText())).exists());
-        assertTrue(employee.findCard().withCondition(c -> "Reise".equals(c.getTitleAsText())).exists());
+        assertTrue(employee.findCard().withCondition(c -> "Number of receipts".equals(c.getTitleAsText())).exists());
+        assertTrue(employee.findCard().withCondition(c -> "Travel".equals(c.getTitleAsText())).exists());
     }
 
     @Test
@@ -45,6 +45,6 @@ class OverviewAndRulesTest {
 
         employee.navigate(RulesView.class);
 
-        assertTrue(employee.findMarkdown().component().getContent().contains("Alkohol"));
+        assertTrue(employee.findMarkdown().component().getContent().contains("alcohol"));
     }
 }

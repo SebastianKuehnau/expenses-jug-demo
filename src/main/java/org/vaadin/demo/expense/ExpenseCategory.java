@@ -1,13 +1,13 @@
 package org.vaadin.demo.expense;
 
 public enum ExpenseCategory {
-    TRAVEL("Reise"),
-    MEALS("Bewirtung"),
-    ACCOMMODATION("Unterkunft"),
-    OFFICE("Büro"),
+    TRAVEL("Travel"),
+    MEALS("Meals"),
+    ACCOMMODATION("Accommodation"),
+    OFFICE("Office"),
     SOFTWARE("Software"),
-    TRAINING("Weiterbildung"),
-    OTHER("Sonstiges");
+    TRAINING("Training"),
+    OTHER("Other");
 
     private final String label;
 

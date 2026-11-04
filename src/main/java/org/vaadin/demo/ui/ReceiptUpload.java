@@ -13,7 +13,7 @@ import java.util.function.Consumer;
 import org.vaadin.demo.receipt.ReceiptData;
 import org.vaadin.demo.receipt.ReceiptExtractionService;
 
-/** "Beleg scannen": drop a receipt, the AI reads it, the result goes to {@code onExtracted}. */
+/** "Scan receipt": drop a receipt, the AI reads it, the result goes to {@code onExtracted}. */
 public class ReceiptUpload extends Composite<VerticalLayout> {
 
     private final ReceiptExtractionService extraction;
@@ -29,7 +29,7 @@ public class ReceiptUpload extends Composite<VerticalLayout> {
                 scan(data, metadata.contentType())));
         upload.setAcceptedFileTypes("image/*", "application/pdf");
         upload.setMaxFiles(1);
-        upload.setUploadButton(new Button("Beleg scannen"));
+        upload.setUploadButton(new Button("Scan receipt"));
         progress.setIndeterminate(true);
         progress.setVisible(false);
         enableIfAiIsConfigured();
@@ -41,7 +41,7 @@ public class ReceiptUpload extends Composite<VerticalLayout> {
     private void enableIfAiIsConfigured() {
         if (!extraction.isAvailable()) {
             upload.setEnabled(false);
-            upload.getElement().setAttribute("title", "Kein OPENAI_API_KEY gesetzt");
+            upload.getElement().setAttribute("title", "No OPENAI_API_KEY configured");
         }
     }
 
@@ -57,7 +57,7 @@ public class ReceiptUpload extends Composite<VerticalLayout> {
         setScanning(false);
         upload.clearFileList();
         if (error != null) {
-            Notification.show("Der Beleg konnte nicht gelesen werden.");
+            Notification.show("The receipt could not be read.");
         } else {
             onExtracted.accept(receipt);
         }
